@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--sb:#1a1a1e;--sbh:#2e2e34;--sbt:#a0a0a8;--main:#f4f3f0;--card:#fff;--border:#e8e6e1;--acc:#e05a3a;--t1:#1a1a1e;--t2:#6b6b72;--t3:#a0a0a8;--green:#2d9e6b;--blue:#2b6cb0;--amber:#c47f1a}
+html,body{height:100%;overflow:hidden;background:#2a2a2e}
+body{display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif}
+#app{display:flex;height:100vh;width:100vw;font-family:'DM Sans',sans-serif;overflow:hidden}
+#sb{width:210px;background:var(--sb);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-top{padding:20px 18px 16px;border-bottom:1px solid #2e2e34}
+.sb-top h1{font-size:15px;font-weight:500;color:#fff}
+.sb-top p{font-size:11px;color:#555560;margin-top:2px}
+.sb-sec{font-size:10px;font-weight:500;color:#444450;letter-spacing:.08em;text-transform:uppercase;padding:14px 16px 4px}
+.sb-i{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:12px;color:var(--sbt);cursor:pointer;transition:background .1s,color .1s;user-select:none}
+.sb-i:hover{background:var(--sbh);color:#ddd}
+.sb-i.on{color:#fff;background:var(--sbh)}
+.sb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sb-n{margin-left:auto;font-size:10px;background:#252528;color:#666;border-radius:8px;padding:1px 5px;font-family:'DM Mono',monospace}
+#main{flex:1;display:flex;flex-direction:column;background:var(--main);overflow:hidden;min-width:0}
+#topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;display:flex;align-items:center;gap:10px;height:52px;flex-shrink:0}
+#topbar h2{font-size:15px;font-weight:500;color:var(--t1);flex:1}
+.tb-btn{padding:6px 14px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:12px;cursor:pointer;color:var(--t1);font-family:'DM Sans',sans-serif;transition:background .1s}
+.tb-btn:hover{background:#f8f7f4}
+.tb-btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.tb-btn.pri:hover{background:#c94e30}
+#ptabs{background:#fff;border-bottom:1px solid var(--border);padding:0 22px;display:flex;flex-shrink:0}
+.ptab{padding:10px 14px;font-size:12px;cursor:pointer;color:var(--t2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .1s}
+.ptab:hover{color:var(--t1)}
+.ptab.on{color:var(--t1);font-weight:500;border-bottom-color:var(--acc)}
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.board{display:flex;gap:14px;padding:20px;flex:1;align-items:flex-start;overflow-x:auto}
+.col{width:280px;flex-shrink:0;display:flex;flex-direction:column;background:rgba(0,0,0,.03);border-radius:10px;overflow:hidden}
+.col-head{display:flex;align-items:center;gap:7px;padding:11px 13px 9px;border-bottom:1px solid var(--border)}
+.col-head-label{font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;flex:1}
+.col-cnt{font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(0,0,0,.07);color:#555;font-family:'DM Mono',monospace}
+.col-add-btn{padding:7px 13px;margin:10px 10px 8px;border:1px dashed #d0cec9;border-radius:7px;font-size:12px;color:var(--t3);cursor:pointer;text-align:center;background:#fff;transition:border-color .1s,color .1s}
+.col-add-btn:hover{border-color:#bbb;color:var(--t2);background:#fafaf8}
+.col-body{display:flex;flex-direction:column;padding:0 10px 10px;overflow-y:auto;max-height:calc(100vh - 220px);min-height:60px}
+.col-body.drag-over{background:rgba(56,138,221,.06)}
+.kcard{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 13px;cursor:grab;transition:border-color .15s,opacity .15s,box-shadow .15s;margin-bottom:7px;user-select:none}
+.kcard:hover{border-color:#ccc;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.kcard.dragging{opacity:.35;cursor:grabbing;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.kcard.drag-placeholder{border:2px dashed #378ADD;background:#f0f6ff;opacity:.6;min-height:52px}
+.kcard-name{font-size:13px;color:var(--t1);line-height:1.4;font-weight:400}
+.kcard-meta{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;align-items:center}
+.pill{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:500}
+.src-badge{font-size:10px;padding:2px 6px;border-radius:5px;background:#f0eee9;color:var(--t2);font-family:'DM Mono',monospace}
+.kcard-notes{font-size:11px;color:var(--t2);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45}
+.kcard-synced{font-size:10px;color:var(--green);margin-top:5px}
+.kcard-src-row{margin-top:5px}
+.stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.sc{background:#fff;border:1px solid var(--border);border-radius:10px;padding:15px 17px}
+.sc .lbl{font-size:11px;color:var(--t3);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.sc .val{font-size:22px;font-weight:400;color:var(--t1);font-family:'DM Mono',monospace}
+.sc .sub{font-size:11px;color:var(--t3);margin-top:3px}
+.prog{height:3px;background:#f0eee9;border-radius:2px;margin-top:9px;overflow:hidden}
+.prog-f{height:100%;border-radius:2px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sec-t{font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.07em}
+.sec-a{font-size:12px;color:var(--acc);cursor:pointer}
+.sec-a:hover{text-decoration:underline}
+.vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px;margin-bottom:16px}
+.vc{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative}
+.vc-w{font-size:14px;font-weight:500;color:var(--t1)}
+.vc-p{font-size:11px;color:var(--t3)}
+.vc-m{font-size:12px;color:var(--t2);margin-top:3px}
+.gc{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.gc-t{font-size:13px;font-weight:500;color:var(--t1)}
+.gc-n{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5}
+.gc-e{font-size:11px;color:var(--t3);margin-top:3px;font-style:italic}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.empty{text-align:center;padding:30px;color:var(--t3);font-size:12px;background:#fff;border:1px solid var(--border);border-radius:8px}
+.ovpage{padding:22px;overflow-y:auto;flex:1}
+.sync-note{font-size:11px;color:var(--green);padding:8px 12px;background:#edf7f3;border-radius:6px;margin-bottom:16px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;width:500px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal-top{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#fff;z-index:1}
+.modal-top h3{font-size:14px;font-weight:500;color:var(--t1);flex:1}
+.modal-close{font-size:22px;cursor:pointer;color:var(--t3);line-height:1;padding:0 2px}
+.modal-close:hover{color:var(--t1)}
+.modal-body{padding:18px 22px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:#fafaf8;color:var(--t1);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .1s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#bbb;background:#fff}
+.field textarea{resize:vertical;min-height:60px}
+.modal-acts{display:flex;gap:8px;justify-content:flex-end;padding:0 22px 18px;border-top:1px solid var(--border);padding-top:14px}
+.btn-c{padding:7px 14px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:12px;cursor:pointer;color:var(--t2);font-family:'DM Sans',sans-serif}
+.btn-c:hover{background:#f8f7f4}
+.btn-s{padding:7px 14px;border:1px solid var(--acc);border-radius:7px;background:var(--acc);font-size:12px;cursor:pointer;color:#fff;font-family:'DM Sans',sans-serif}
+.btn-s:hover{background:#c94e30}
+.ds{background:#fafaf8;border:1px solid var(--border);border-radius:8px;padding:13px 15px;margin-bottom:12px}
+.ds h4{font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+.ve{display:flex;gap:6px;margin-bottom:6px}
+.ve input{flex:1;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fff;color:var(--t1);font-family:'DM Sans',sans-serif;outline:none}
+.ve input:focus{border-color:#bbb}
+.rm{padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:13px;cursor:pointer;color:var(--acc);flex-shrink:0}
+.add-row{font-size:12px;color:var(--acc);cursor:pointer;margin-top:4px;display:inline-block}
+.add-row:hover{text-decoration:underline}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d0cec9;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#bbb}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="sb">
+  <div class="sb-top"><h1>My Space</h1><p id="sb-date"></p></div>
+  <div class="sb-sec">Overview</div>
+  <div class="sb-i on" data-pg="dashboard"><span style="font-size:13px">&#9632;</span> Dashboard <span class="sb-n" id="cn-all">0</span></div>
+  <div class="sb-i" data-pg="today"><span style="font-size:13px">&#9675;</span> Today <span class="sb-n" id="cn-today">0</span></div>
+  <div class="sb-sec">Courses</div>
+  <div class="sb-i" data-pg="course-chinese"><span class="sb-dot" style="background:#2d9e6b"></span> Chinese <span class="sb-n" id="cn-zh">0</span></div>
+  <div class="sb-i" data-pg="course-spanish"><span class="sb-dot" style="background:#2b6cb0"></span> Spanish <span class="sb-n" id="cn-es">0</span></div>
+  <div class="sb-sec">Subscriptions</div>
+  <div class="sb-i" data-pg="cat-Subscriptions"><span class="sb-dot" style="background:#7c6fcd"></span> All subscriptions</div>
+  <div class="sb-sec">Finances</div>
+  <div class="sb-i" data-pg="cat-Bills"><span class="sb-dot" style="background:#e05a3a"></span> Bills &amp; rent</div>
+  <div class="sb-sec">Lifestyle</div>
+  <div class="sb-i" data-pg="cat-Daily"><span class="sb-dot" style="background:#2b6cb0"></span> Daily habits</div>
+  <div class="sb-i" data-pg="cat-Personal"><span class="sb-dot" style="background:#c47f1a"></span> Personal</div>
+  <div style="margin-top:auto;border-top:1px solid #2e2e34;padding:6px 0">
+    <div class="sb-i" data-pg="done"><span style="color:#2d9e6b;font-size:13px">&#10003;</span> Completed <span class="sb-n" id="cn-done">0</span></div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="topbar">
+    <h2 id="pg-title">Dashboard</h2>
+  </div>
+  <div id="ptabs" style="display:none"></div>
+  <div id="content" style="overflow:hidden;display:flex;flex-direction:column;flex:1"></div>
+</div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal-bg" id="task-modal">
+  <div class="modal">
+    <div class="modal-top">
+      <h3 id="tm-title">New task</h3>
+      <span class="modal-close" id="tm-close">&#215;</span>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Task name</label><input id="f-name" placeholder="What needs doing?"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Category</label>
+          <select id="f-cat">
+            <option value="Courses:chinese">Courses — Chinese</option>
+            <option value="Courses:spanish">Courses — Spanish</option>
+            <option value="Subscriptions">Subscriptions</option>
+            <option value="Bills">Bills &amp; rent</option>
+            <option value="Daily">Daily habits</option>
+            <option value="Personal">Personal</option>
+          </select>
+        </div>
+        <div class="field"><label>Status</label>
+          <select id="f-status">
+            <option value="todo">To-do</option>
+            <option value="doing">Doing</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Due date</label><input id="f-due" type="date"></div>
+        <div class="field"><label>Recurring</label>
+          <select id="f-recur"><option value="">One-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Source (podcast, book, app…)</label><input id="f-src" placeholder="e.g. ChinesePod Ep.42, HSK2 Book, Duolingo"></div>
+      <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="General notes…"></textarea></div>
+      <div class="ds" id="vocab-section">
+        <h4>&#128218; Vocab learned <span style="color:#2d9e6b;font-weight:400;font-size:10px;text-transform:none;letter-spacing:0">— auto-syncs to course overview</span></h4>
+        <div id="vocab-entries"></div>
+        <span class="add-row" id="add-vocab-row">+ add word</span>
+      </div>
+      <div class="ds" id="gram-section">
+        <h4>&#128221; Grammar noted <span style="color:#2d9e6b;font-weight:400;font-size:10px;text-transform:none;letter-spacing:0">— auto-syncs to grammar tab</span></h4>
+        <div id="gram-entries"></div>
+        <span class="add-row" id="add-gram-row">+ add grammar note</span>
+      </div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn-c" id="tm-del" style="color:#e05a3a;margin-right:auto;display:none">Delete task</button>
+      <button class="btn-c" id="tm-cancel">Cancel</button>
+      <button class="btn-s" id="tm-save">Save task</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAT={
+  'Courses:chinese':{label:'Chinese',color:'#2d9e6b',bg:'#edf7f3',tc:'#1a6645',lang:'chinese'},
+  'Courses:spanish':{label:'Spanish',color:'#2b6cb0',bg:'#eaf1f9',tc:'#1a4a7a',lang:'spanish'},
+  'Subscriptions':{label:'Subscriptions',color:'#7c6fcd',bg:'#f0eefb',tc:'#4a3fa0',lang:null},
+  'Bills':{label:'Bills',color:'#e05a3a',bg:'#fdf0ec',tc:'#a03520',lang:null},
+  'Daily':{label:'Daily habits',color:'#2b6cb0',bg:'#eaf1f9',tc:'#1a4a7a',lang:null},
+  'Personal':{label:'Personal',color:'#c47f1a',bg:'#fdf4e3',tc:'#8a5410',lang:null},
+};
+const COLS={
+  todo:{label:'To-do',dot:'#aaa',hbg:'#f5f4f0'},
+  doing:{label:'Doing',dot:'#2b6cb0',hbg:'#e8f2fc'},
+  done:{label:'Done',dot:'#2d9e6b',hbg:'#e8f5ef'}
+};
+
+let S={tasks:[],page:'dashboard',tab:'',eid:null};
+const uid=()=>Date.now()+Math.random();
+const todayStr=()=>new Date().toISOString().split('T')[0];
+function nm(){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+1);return d.toISOString().split('T')[0]}
+
+const DT=[
+  {id:1,name:'Listen to ChinesePod Ep.42',cat:'Courses:chinese',status:'doing',due:'',recur:'daily',src:'ChinesePod',notes:'Focus on tones in context',vocab:[{w:'学习',p:'xuéxí',m:'to study'},{w:'朋友',p:'péngyǒu',m:'friend'}],gram:[]},
+  {id:2,name:'HSK2 chapter 3 — vocab drill',cat:'Courses:chinese',status:'todo',due:'',recur:'weekly',src:'HSK2 Textbook',notes:'',vocab:[{w:'你好',p:'nǐ hǎo',m:'hello'},{w:'谢谢',p:'xiè xie',m:'thank you'}],gram:[{t:'是...的 emphasis',n:'Emphasizes time/place of past action',e:'我是昨天来的'}]},
+  {id:3,name:'Spanish unit 5 — grammar',cat:'Courses:spanish',status:'todo',due:'',recur:'weekly',src:'Coursebook',notes:'',vocab:[{w:'hablar',p:'ah-BLAR',m:'to speak'}],gram:[{t:'Ser vs Estar',n:'Ser=permanent, Estar=temporary',e:'Soy estudiante. Estoy cansado.'}]},
+  {id:4,name:'Duolingo — 10 min',cat:'Courses:spanish',status:'doing',due:'',recur:'daily',src:'Duolingo',notes:'Streak: keep going!',vocab:[{w:'hola',p:'OH-lah',m:'hello'},{w:'gracias',p:'GRAH-syahs',m:'thank you'}],gram:[]},
+  {id:5,name:'AI/ML course — watch lecture',cat:'Subscriptions',status:'todo',due:'',recur:'daily',src:'Coursera',notes:'',vocab:[],gram:[]},
+  {id:6,name:'Pay rent',cat:'Bills',status:'todo',due:nm(),recur:'monthly',src:'',notes:'',vocab:[],gram:[]},
+  {id:7,name:'Pay telecom bill',cat:'Bills',status:'todo',due:nm(),recur:'monthly',src:'',notes:'',vocab:[],gram:[]},
+  {id:8,name:'Daily gym workout',cat:'Daily',status:'doing',due:'',recur:'daily',src:'',notes:'',vocab:[],gram:[]},
+  {id:9,name:'Tidy up room',cat:'Daily',status:'todo',due:'',recur:'weekly',src:'',notes:'',vocab:[],gram:[]},
+  {id:10,name:'Review weekly goals',cat:'Personal',status:'todo',due:'',recur:'weekly',src:'',notes:'Every Sunday evening',vocab:[],gram:[]},
+];
+
+function load(){try{const t=localStorage.getItem('myspace_v1');S.tasks=t?JSON.parse(t):DT}catch{S.tasks=DT}render()}
+function persist(){try{localStorage.setItem('myspace_v1',JSON.stringify(S.tasks))}catch{}}
+
+function allVocab(lang){const seen=new Set();const out=[];S.tasks.filter(t=>CAT[t.cat]&&CAT[t.cat].lang===lang).forEach(t=>(t.vocab||[]).forEach(v=>{const k=v.w.trim().toLowerCase();if(k&&!seen.has(k)){seen.add(k);out.push({...v,src:t.src||t.name,tid:t.id})}}));return out}
+function allGram(lang){const seen=new Set();const out=[];S.tasks.filter(t=>CAT[t.cat]&&CAT[t.cat].lang===lang).forEach(t=>(t.gram||[]).forEach(g=>{const k=g.t.trim().toLowerCase();if(k&&!seen.has(k)){seen.add(k);out.push({...g,src:t.src||t.name,tid:t.id})}}));return out}
+
+function counts(){
+  const a=S.tasks.filter(t=>t.status!=='done');
+  document.getElementById('cn-all').textContent=a.length;
+  document.getElementById('cn-today').textContent=a.filter(t=>t.recur==='daily'||t.due===todayStr()).length;
+  document.getElementById('cn-done').textContent=S.tasks.filter(t=>t.status==='done').length;
+  document.getElementById('cn-zh').textContent=a.filter(t=>t.cat==='Courses:chinese').length;
+  document.getElementById('cn-es').textContent=a.filter(t=>t.cat==='Courses:spanish').length;
+}
+
+function setPage(pg){S.page=pg;S.tab='';document.querySelectorAll('.sb-i').forEach(el=>el.classList.toggle('on',el.dataset.pg===pg));render()}
+
+function render(){
+  counts();
+  const pg=S.page,title=document.getElementById('pg-title'),tabs=document.getElementById('ptabs'),content=document.getElementById('content');
+  const isCourse=pg==='course-chinese'||pg==='course-spanish';
+  if(isCourse){
+    const lang=pg==='course-chinese'?'chinese':'spanish';
+    title.textContent=lang==='chinese'?'Chinese course':'Spanish course';
+    const tlist=['board','overview','vocab','grammar'];
+    if(!S.tab||!tlist.includes(S.tab)) S.tab='board';
+    tabs.style.display='flex';
+    tabs.innerHTML=tlist.map(t=>`<div class="ptab${S.tab===t?' on':''}" data-tab="${t}">${t[0].toUpperCase()+t.slice(1)}</div>`).join('');
+    tabs.querySelectorAll('.ptab').forEach(el=>el.addEventListener('click',()=>{S.tab=el.dataset.tab;render()}));
+    if(S.tab==='board') renderBoard(S.tasks.filter(t=>t.cat==='Courses:'+lang),content,'Courses:'+lang);
+    else if(S.tab==='vocab') renderVocabPage(lang,content);
+    else if(S.tab==='grammar') renderGramPage(lang,content);
+    else renderCourseOverview(lang,content);
+  } else {
+    tabs.style.display='none';
+    if(pg==='dashboard'){title.textContent='Dashboard';renderDashboard(content)}
+    else if(pg==='today'){title.textContent='Today';renderBoard(S.tasks.filter(t=>t.recur==='daily'||t.due===todayStr()),content,null)}
+    else if(pg==='done'){title.textContent='Completed';renderBoard(S.tasks.filter(t=>t.status==='done'),content)}
+    else{const k=pg.replace('cat-','');title.textContent=CAT[k]?CAT[k].label:k;renderBoard(S.tasks.filter(t=>t.cat===k),content,k)}
+  }
+}
+
+function cardHTML(t){
+  const m=CAT[t.cat]||{bg:'#f5f5f5',tc:'#555',label:t.cat};
+  const ov=t.due&&t.due<todayStr()&&t.status!=='done';
+  const synced=(t.vocab&&t.vocab.length)||(t.gram&&t.gram.length);
+  return `<div class="kcard" draggable="true" data-id="${t.id}">
+    <div class="kcard-name">${t.name}</div>
+    ${t.src?`<div class="kcard-src-row"><span class="src-badge">${t.src}</span></div>`:''}
+    <div class="kcard-meta">
+      <span class="pill" style="background:${m.bg};color:${m.tc}">${m.label}</span>
+      ${t.recur?`<span style="font-size:10px;color:#ccc">&#8635; ${t.recur}</span>`:''}
+      ${t.due?`<span style="font-size:10px;color:${ov?'#e05a3a':'#ccc'}">${ov?'Overdue ':''}${t.due}</span>`:''}
+    </div>
+    ${t.notes?`<div class="kcard-notes">${t.notes}</div>`:''}
+    ${synced?`<div class="kcard-synced">&#9679; ${(t.vocab||[]).length} vocab &middot; ${(t.gram||[]).length} grammar synced</div>`:''}
+  </div>`;
+}
+
+let dragId=null,placeholder=null;
+
+function renderBoard(tasks,container,defaultCat){
+  let html=`<div class="board" id="board">`;
+  ['todo','doing','done'].forEach(st=>{
+    const cfg=COLS[st];
+    const items=tasks.filter(t=>t.status===st);
+    html+=`<div class="col" data-col="${st}">
+      <div class="col-head" style="background:${cfg.hbg}">
+        <span style="width:8px;height:8px;border-radius:50%;background:${cfg.dot};display:inline-block;flex-shrink:0"></span>
+        <span class="col-head-label">${cfg.label}</span>
+        <span class="col-cnt">${items.length}</span>
+      </div>
+      <div class="col-add-btn" data-addcol="${st}" data-addcat="${defaultCat||'Daily'}">+ Add task</div>
+      <div class="col-body" data-col="${st}">`;
+    items.forEach(t=>{html+=cardHTML(t)});
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  container.innerHTML=html;
+  bindBoard(container);
+}
+
+function bindBoard(container){
+  container.querySelectorAll('.kcard').forEach(el=>{
+    el.addEventListener('click',()=>openTaskModal(+el.dataset.id));
+    el.addEventListener('dragstart',e=>{
+      dragId=+el.dataset.id;
+      setTimeout(()=>el.classList.add('dragging'),0);
+      e.dataTransfer.effectAllowed='move';
+    });
+    el.addEventListener('dragend',()=>{
+      el.classList.remove('dragging');
+      document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over'));
+      if(placeholder&&placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+      placeholder=null;dragId=null;
+    });
+  });
+  container.querySelectorAll('.col-body').forEach(colBody=>{
+    colBody.addEventListener('dragover',e=>{
+      e.preventDefault();e.dataTransfer.dropEffect='move';
+      colBody.classList.add('drag-over');
+      const afterEl=getDragAfter(colBody,e.clientY);
+      if(!placeholder){placeholder=document.createElement('div');placeholder.className='kcard drag-placeholder';placeholder.style.height='48px';placeholder.style.pointerEvents='none'}
+      if(afterEl==null) colBody.appendChild(placeholder);
+      else colBody.insertBefore(placeholder,afterEl);
+    });
+    colBody.addEventListener('dragleave',e=>{if(!colBody.contains(e.relatedTarget)) colBody.classList.remove('drag-over')});
+    colBody.addEventListener('drop',e=>{
+      e.preventDefault();
+      colBody.classList.remove('drag-over');
+      if(dragId==null) return;
+      const task=S.tasks.find(t=>t.id===dragId);
+      if(task){task.status=colBody.dataset.col;persist();render()}
+    });
+  });
+  container.querySelectorAll('.col-add-btn').forEach(el=>{
+    el.addEventListener('click',()=>openTaskModal(null,el.dataset.addcat,el.dataset.addcol));
+  });
+}
+
+function getDragAfter(container,y){
+  const els=[...container.querySelectorAll('.kcard:not(.dragging):not(.drag-placeholder)')];
+  return els.reduce((closest,el)=>{
+    const box=el.getBoundingClientRect();
+    const offset=y-box.top-box.height/2;
+    if(offset<0&&offset>closest.offset) return{offset,element:el};
+    return closest;
+  },{offset:Number.NEGATIVE_INFINITY}).element;
+}
+
+function renderDashboard(container){
+  const active=S.tasks.filter(t=>t.status!=='done');
+  const done=S.tasks.filter(t=>t.status==='done');
+  const todayT=active.filter(t=>t.recur==='daily'||t.due===todayStr());
+  const pct=S.tasks.length?Math.round(done.length/S.tasks.length*100):0;
+  const zhV=allVocab('chinese');const esV=allVocab('spanish');
+  const doing=S.tasks.filter(t=>t.status==='doing');
+  let html=`<div class="ovpage"><div class="stat-row">
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#e05a3a;display:inline-block"></span> Active tasks</div><div class="val">${active.length}</div><div class="sub">${done.length} done total</div></div>
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#2b6cb0;display:inline-block"></span> Due today</div><div class="val">${todayT.length}</div></div>
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#2d9e6b;display:inline-block"></span> Completion</div><div class="val">${pct}<span style="font-size:13px;color:#bbb">%</span></div><div class="prog"><div class="prog-f" style="width:${pct}%;background:#2d9e6b"></div></div></div>
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#7c6fcd;display:inline-block"></span> Vocab collected</div><div class="val">${zhV.length+esV.length}</div><div class="sub">${zhV.length} ZH &middot; ${esV.length} ES</div></div>
+  </div><div class="two-col"><div>
+    <div class="sec-h"><span class="sec-t">In progress</span></div>`;
+  if(doing.length) doing.forEach(t=>{const m=CAT[t.cat]||{bg:'#f5f5f5',tc:'#555',label:t.cat};html+=`<div class="kcard" data-open="${t.id}" style="margin-bottom:7px;cursor:pointer"><div class="kcard-name">${t.name}</div>${t.src?`<div class="kcard-src-row"><span class="src-badge">${t.src}</span></div>`:''}<div class="kcard-meta"><span class="pill" style="background:${m.bg};color:${m.tc}">${m.label}</span></div>${((t.vocab||[]).length||(t.gram||[]).length)?`<div class="kcard-synced">&#9679; ${(t.vocab||[]).length} vocab &middot; ${(t.gram||[]).length} grammar synced</div>`:''}</div>`});
+  else html+=`<div class="empty">No tasks in progress</div>`;
+  html+=`</div><div><div class="sec-h"><span class="sec-t">Recent vocab (from tasks)</span></div><div class="vg">`;
+  [...zhV.slice(0,3),...esV.slice(0,3)].forEach(v=>{html+=`<div class="vc"><div class="vc-w">${v.w}</div><div class="vc-p">${v.p}</div><div class="vc-m">${v.m}</div><div style="font-size:9px;color:#bbb;margin-top:3px">${v.src}</div></div>`});
+  html+=`</div></div></div></div>`;
+  container.innerHTML=html;
+  container.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click',()=>openTaskModal(+el.dataset.open)));
+}
+
+function renderCourseOverview(lang,container){
+  const v=allVocab(lang);const g=allGram(lang);
+  const tasks=S.tasks.filter(t=>t.cat==='Courses:'+lang);
+  const col=lang==='chinese'?'#2d9e6b':'#2b6cb0';
+  let html=`<div class="ovpage">
+  <div class="stat-row">
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:${col};display:inline-block"></span> Vocab collected</div><div class="val">${v.length}</div></div>
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#c47f1a;display:inline-block"></span> Grammar notes</div><div class="val">${g.length}</div></div>
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#2b6cb0;display:inline-block"></span> Doing</div><div class="val">${tasks.filter(t=>t.status==='doing').length}</div></div>
+    <div class="sc"><div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#aaa;display:inline-block"></span> To-do</div><div class="val">${tasks.filter(t=>t.status==='todo').length}</div></div>
+  </div>
+  <div class="sync-note">&#9889; Vocab and grammar below are automatically pulled from your task notes. Open any task card on the Board tab to add words.</div>
+  <div class="two-col"><div>
+    <div class="sec-h"><span class="sec-t">Vocab (synced)</span></div><div class="vg">`;
+  if(!v.length) html+=`<div class="empty" style="grid-column:1/-1">No vocab yet — add words inside task cards on the Board</div>`;
+  else v.forEach(vw=>{html+=`<div class="vc"><div class="vc-w" style="color:${col}">${vw.w}</div><div class="vc-p">${vw.p}</div><div class="vc-m">${vw.m}</div><div style="font-size:9px;color:#bbb;margin-top:3px">from: ${vw.src}</div></div>`});
+  html+=`</div></div><div><div class="sec-h"><span class="sec-t">Grammar (synced)</span></div>`;
+  if(!g.length) html+=`<div class="empty">No grammar yet</div>`;
+  else g.forEach(gn=>{html+=`<div class="gc"><div class="gc-t">${gn.t}</div><div class="gc-n">${gn.n}</div>${gn.e?`<div class="gc-e">"${gn.e}"</div>`:''}<div style="font-size:9px;color:#bbb;margin-top:3px">from: ${gn.src}</div></div>`});
+  html+=`</div></div></div>`;
+  container.innerHTML=html;
+}
+
+function renderVocabPage(lang,container){
+  const v=allVocab(lang);const col=lang==='chinese'?'#2d9e6b':'#2b6cb0';
+  let html=`<div class="ovpage"><div class="sync-note">&#9889; All vocab auto-synced from task notes. Open any task card on the Board to add words.</div>
+  <div class="sec-h"><span class="sec-t">All vocabulary — ${lang}</span><span style="font-size:11px;color:#bbb">${v.length} words</span></div><div class="vg">`;
+  if(!v.length) html+=`<div class="empty" style="grid-column:1/-1">No vocab yet</div>`;
+  else v.forEach(vw=>{html+=`<div class="vc"><div class="vc-w" style="color:${col}">${vw.w}</div><div class="vc-p">${vw.p}</div><div class="vc-m">${vw.m}</div><div style="font-size:9px;color:#bbb;margin-top:3px">from: ${vw.src}</div></div>`});
+  html+=`</div></div>`;container.innerHTML=html;
+}
+
+function renderGramPage(lang,container){
+  const g=allGram(lang);
+  let html=`<div class="ovpage"><div class="sync-note">&#9889; Grammar auto-synced from task notes. Open any task card on the Board to add grammar.</div>
+  <div class="sec-h"><span class="sec-t">Grammar notes — ${lang}</span></div>`;
+  if(!g.length) html+=`<div class="empty">No grammar yet</div>`;
+  else g.forEach(gn=>{html+=`<div class="gc"><div class="gc-t">${gn.t}</div><div class="gc-n">${gn.n}</div>${gn.e?`<div class="gc-e">"${gn.e}"</div>`:''}<div style="font-size:9px;color:#bbb;margin-top:3px">from: ${gn.src}</div></div>`});
+  html+=`</div>`;container.innerHTML=html;
+}
+
+let mVocab=[],mGram=[];
+
+function openTaskModal(eid=null,catDef=null,stDef=null){
+  S.eid=eid;
+  const t=eid?S.tasks.find(x=>x.id===eid):null;
+  document.getElementById('tm-title').textContent=eid?'Edit task':'New task';
+  document.getElementById('f-name').value=t?t.name:'';
+  document.getElementById('f-cat').value=t?t.cat:(catDef||'Daily');
+  document.getElementById('f-status').value=t?t.status:(stDef||'todo');
+  document.getElementById('f-due').value=t&&t.due?t.due:'';
+  document.getElementById('f-recur').value=t&&t.recur?t.recur:'';
+  document.getElementById('f-src').value=t&&t.src?t.src:'';
+  document.getElementById('f-notes').value=t&&t.notes?t.notes:'';
+  mVocab=t&&t.vocab?t.vocab.map(v=>({...v})):[];
+  mGram=t&&t.gram?t.gram.map(g=>({...g})):[];
+  document.getElementById('tm-del').style.display=eid?'block':'none';
+  toggleSyncSections(document.getElementById('f-cat').value);
+  document.getElementById('f-cat').onchange=function(){toggleSyncSections(this.value)};
+  renderMV();renderMG();
+  document.getElementById('task-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('f-name').focus(),50);
+}
+
+function toggleSyncSections(cat){
+  const show=cat.startsWith('Courses:');
+  document.getElementById('vocab-section').style.display=show?'block':'none';
+  document.getElementById('gram-section').style.display=show?'block':'none';
+}
+
+function renderMV(){
+  const c=document.getElementById('vocab-entries');
+  c.innerHTML=mVocab.map((v,i)=>`<div class="ve">
+    <input value="${v.w||''}" placeholder="word" data-vi="${i}" data-vf="w">
+    <input value="${v.p||''}" placeholder="pronunciation" data-vi="${i}" data-vf="p">
+    <input value="${v.m||''}" placeholder="meaning" data-vi="${i}" data-vf="m">
+    <button class="rm" data-vdel="${i}">&#215;</button>
+  </div>`).join('');
+  c.querySelectorAll('input[data-vi]').forEach(el=>el.addEventListener('input',()=>{mVocab[+el.dataset.vi][el.dataset.vf]=el.value}));
+  c.querySelectorAll('[data-vdel]').forEach(el=>el.addEventListener('click',()=>{mVocab.splice(+el.dataset.vdel,1);renderMV()}));
+}
+
+function renderMG(){
+  const c=document.getElementById('gram-entries');
+  c.innerHTML=mGram.map((g,i)=>`<div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:9px 11px;margin-bottom:7px">
+    <div class="ve" style="margin-bottom:6px">
+      <input value="${g.t||''}" placeholder="pattern / rule" data-gi="${i}" data-gf="t" style="flex:2">
+      <button class="rm" data-gdel="${i}">&#215;</button>
+    </div>
+    <div style="display:flex;gap:6px">
+      <input value="${g.n||''}" placeholder="explanation" data-gi="${i}" data-gf="n" style="flex:1;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fafaf8;color:#1a1a1e;font-family:DM Sans,sans-serif;outline:none">
+      <input value="${g.e||''}" placeholder="example" data-gi="${i}" data-gf="e" style="flex:1;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fafaf8;color:#1a1a1e;font-family:DM Sans,sans-serif;outline:none">
+    </div>
+  </div>`).join('');
+  c.querySelectorAll('input[data-gi]').forEach(el=>el.addEventListener('input',()=>{mGram[+el.dataset.gi][el.dataset.gf]=el.value}));
+  c.querySelectorAll('[data-gdel]').forEach(el=>el.addEventListener('click',()=>{mGram.splice(+el.dataset.gdel,1);renderMG()}));
+}
+
+function closeTaskModal(){document.getElementById('task-modal').classList.remove('open');S.eid=null}
+
+function saveTask(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name) return;
+  const data={name,cat:document.getElementById('f-cat').value,status:document.getElementById('f-status').value,due:document.getElementById('f-due').value,recur:document.getElementById('f-recur').value,src:document.getElementById('f-src').value,notes:document.getElementById('f-notes').value,vocab:mVocab.filter(v=>v.w&&v.m),gram:mGram.filter(g=>g.t)};
+  if(S.eid) Object.assign(S.tasks.find(x=>x.id===S.eid),data);
+  else S.tasks.push({id:uid(),...data});
+  persist();closeTaskModal();render();
+}
+
+function deleteTask(){
+  if(!S.eid) return;
+  if(!confirm('Delete this task?')) return;
+  S.tasks=S.tasks.filter(t=>t.id!==S.eid);
+  persist();closeTaskModal();render();
+}
+
+document.getElementById('tm-close').addEventListener('click',closeTaskModal);
+document.getElementById('tm-cancel').addEventListener('click',closeTaskModal);
+document.getElementById('tm-save').addEventListener('click',saveTask);
+document.getElementById('tm-del').addEventListener('click',deleteTask);
+document.getElementById('task-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTaskModal()});
+document.getElementById('add-vocab-row').addEventListener('click',()=>{mVocab.push({w:'',p:'',m:''});renderMV()});
+document.getElementById('add-gram-row').addEventListener('click',()=>{mGram.push({t:'',n:'',e:''});renderMG()});
+document.getElementById('f-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveTask()});
+document.querySelectorAll('.sb-i[data-pg]').forEach(el=>el.addEventListener('click',()=>setPage(el.dataset.pg)));
+document.getElementById('sb-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+
+load();
+</script>
+</body>
+</html>
